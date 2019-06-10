@@ -1,0 +1,1 @@
+cp src/gwt/lib/gin/*/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gin_LICENSE

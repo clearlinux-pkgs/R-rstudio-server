@@ -1,0 +1,9 @@
+export LD_LIBRARY_PATH=/usr/lib64/R/lib/
+
+mkdir dependencies/common/dictionaries
+cp %{SOURCE3} src/gwt/lib
+
+GIN_BASENAME=`basename %{SOURCE1} .zip`
+mkdir -p src/gwt/lib/${GIN_BASENAME/-//}
+unzip -q -d src/gwt/lib/${GIN_BASENAME/-//} %{SOURCE1}
+
