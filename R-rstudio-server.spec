@@ -4,7 +4,7 @@
 #
 Name     : R-rstudio-server
 Version  : 1.2.1335
-Release  : 4
+Release  : 5
 URL      : https://github.com/rstudio/rstudio/archive/v1.2.1335.tar.gz
 Source0  : https://github.com/rstudio/rstudio/archive/v1.2.1335.tar.gz
 Source1  : https://s3.amazonaws.com/rstudio-buildtools/gin-2.1.2.zip
@@ -20,8 +20,10 @@ BuildRequires : R
 BuildRequires : R-dev
 BuildRequires : R-lib
 BuildRequires : apache-ant
+BuildRequires : apache-maven
 BuildRequires : boost-dev
 BuildRequires : buildreq-cmake
+BuildRequires : buildreq-mvn
 BuildRequires : buildreq-qmake
 BuildRequires : openjdk
 BuildRequires : openssl-dev
@@ -51,8 +53,20 @@ BuildRequires : zlib-dev
 Patch1: 0001-Disable-installation-of-pandoc.patch
 
 %description
-Install Required Applications
-=============================================================================
+/*
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*     http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
 
 %package license
 Summary: license components for the R-rstudio-server package.
@@ -64,34 +78,34 @@ license components for the R-rstudio-server package.
 
 %prep
 %setup -q -n rstudio-1.2.1335
-cd ..
-%setup -q -T -D -n rstudio-1.2.1335 -b 4
-cd ..
-%setup -q -T -D -n rstudio-1.2.1335 -b 2
-cd ..
-%setup -q -T -D -n rstudio-1.2.1335 -b 1
-cd ..
-%setup -q -T -D -n rstudio-1.2.1335 -b 3
+cd %{_builddir}
+unzip -q %{_sourcedir}/mathjax-26.zip
+cd %{_builddir}
+unzip -q %{_sourcedir}/gwt-2.8.1.zip
+cd %{_builddir}
+mkdir -p gin-2.1.2
+cd gin-2.1.2
+unzip -q %{_sourcedir}/gin-2.1.2.zip
+cd %{_builddir}/rstudio-1.2.1335
 mkdir -p dependencies/common/mathjax-26
-cp -r %{_topdir}/BUILD/mathjax-26/* %{_topdir}/BUILD/rstudio-1.2.1335/dependencies/common/mathjax-26
+cp -r %{_builddir}/mathjax-26/* %{_builddir}/rstudio-1.2.1335/dependencies/common/mathjax-26
 mkdir -p src/gwt/lib/gwt/2.8.1
-cp -r %{_topdir}/BUILD/gwt-2.8.1/* %{_topdir}/BUILD/rstudio-1.2.1335/src/gwt/lib/gwt/2.8.1
+cp -r %{_builddir}/gwt-2.8.1/* %{_builddir}/rstudio-1.2.1335/src/gwt/lib/gwt/2.8.1
+mkdir -p src/gwt/lib/gin/2.1.2
+cp -r %{_builddir}/gin-2.1.2/* %{_builddir}/rstudio-1.2.1335/src/gwt/lib/gin/2.1.2
 %patch1 -p1
 
 %build
 ## build_prepend content
 export LD_LIBRARY_PATH=/usr/lib64/R/lib/
 mkdir dependencies/common/dictionaries
-cp %{SOURCE3} src/gwt/lib
-GIN_BASENAME=`basename %{SOURCE1} .zip`
-mkdir -p src/gwt/lib/${GIN_BASENAME/-//}
-unzip -q -d src/gwt/lib/${GIN_BASENAME/-//} %{SOURCE1}
+find ../../SOURCES -type f -name '*.jar' -exec cp -t src/gwt/lib/ {} +
 ## build_prepend end
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-export LANG=C
-export SOURCE_DATE_EPOCH=1560205296
+export LANG=C.UTF-8
+export SOURCE_DATE_EPOCH=1574710653
 mkdir -p clr-build
 pushd clr-build
 export GCC_IGNORE_WERROR=1
@@ -105,31 +119,32 @@ export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=4 "
 %cmake .. -DRSTUDIO_TARGET=Server \
 -DQT_QMAKE_EXECUTABLE=`which qmake` \
 -DCMAKE_INSTALL_PREFIX=/usr/lib64/R/rstudio-server
-make  %{?_smp_mflags} VERBOSE=1
+make  %{?_smp_mflags}  VERBOSE=1
 popd
 
 %install
-export SOURCE_DATE_EPOCH=1560205296
+export SOURCE_DATE_EPOCH=1574710653
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/R-rstudio-server
-cp COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/COPYING
-cp NOTICE %{buildroot}/usr/share/package-licenses/R-rstudio-server/NOTICE
-cp dependencies/common/mathjax-26/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-server/dependencies_common_mathjax-26_LICENSE
-cp src/cpp/core/json/spirit/LICENSE.txt %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_cpp_core_json_spirit_LICENSE.txt
-cp src/cpp/core/spelling/hunspell/license.hunspell %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_cpp_core_spelling_hunspell_license.hunspell
-cp src/cpp/core/spelling/hunspell/license.myspell %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_cpp_core_spelling_hunspell_license.myspell
-cp src/cpp/session/resources/presentation/revealjs/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_cpp_session_resources_presentation_revealjs_LICENSE
-cp src/cpp/tests/testthat/themes/License.txt %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_cpp_tests_testthat_themes_License.txt
-cp src/gwt/lib/gwt/2.8.1/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_COPYING
-cp src/gwt/lib/gwt/2.8.1/COPYING.html %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_COPYING.html
-cp src/gwt/lib/gwt/2.8.1/samples/DynaTable/src/com/google/gwt/sample/dynatable/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_samples_DynaTable_src_com_google_gwt_sample_dynatable_COPYING
-cp src/gwt/lib/gwt/2.8.1/samples/DynaTableRf/src/main/java/com/google/gwt/sample/dynatablerf/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_samples_DynaTableRf_src_main_java_com_google_gwt_sample_dynatablerf_COPYING
-cp src/gwt/lib/gwt/2.8.1/samples/Hello/src/com/google/gwt/sample/hello/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_samples_Hello_src_com_google_gwt_sample_hello_COPYING
-cp src/gwt/lib/gwt/2.8.1/samples/JSON/src/com/google/gwt/sample/json/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_samples_JSON_src_com_google_gwt_sample_json_COPYING
-cp src/gwt/lib/gwt/2.8.1/samples/Mail/src/com/google/gwt/sample/mail/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_samples_Mail_src_com_google_gwt_sample_mail_COPYING
-cp src/gwt/lib/gwt/2.8.1/samples/Validation/src/main/java/com/google/gwt/sample/validation/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_samples_Validation_src_main_java_com_google_gwt_sample_validation_COPYING
-cp src/gwt/src/com/sksamuel/gwt/LICENSE.txt %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_src_com_sksamuel_gwt_LICENSE.txt
-cp src/gwt/tools/compiler/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_tools_compiler_COPYING
+cp %{_builddir}/rstudio-1.2.1335/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/43a6c601dc09187ccfe403679afe04988c6f9858
+cp %{_builddir}/rstudio-1.2.1335/NOTICE %{buildroot}/usr/share/package-licenses/R-rstudio-server/8cfb5afa492016675405787f5dadd548193b43b2
+cp %{_builddir}/rstudio-1.2.1335/dependencies/common/mathjax-26/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-server/2b8b815229aa8a61e483fb4ba0588b8b6c491890
+cp %{_builddir}/rstudio-1.2.1335/src/cpp/core/json/spirit/LICENSE.txt %{buildroot}/usr/share/package-licenses/R-rstudio-server/de651d505f443d8282b17cc8799399a25a7a65e3
+cp %{_builddir}/rstudio-1.2.1335/src/cpp/core/spelling/hunspell/license.hunspell %{buildroot}/usr/share/package-licenses/R-rstudio-server/9e6f2cb9a6650516417e8cbcbd753c79567d8ea5
+cp %{_builddir}/rstudio-1.2.1335/src/cpp/core/spelling/hunspell/license.myspell %{buildroot}/usr/share/package-licenses/R-rstudio-server/a897c88546c86e1f1eaebd89bc101404d51e81cc
+cp %{_builddir}/rstudio-1.2.1335/src/cpp/session/resources/presentation/revealjs/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-server/658051ae7581a663db2474f286aea7eb98490e33
+cp %{_builddir}/rstudio-1.2.1335/src/cpp/tests/testthat/themes/License.txt %{buildroot}/usr/share/package-licenses/R-rstudio-server/624d6970b031569fe546798dda4f8234a8f9ed83
+cp %{_builddir}/rstudio-1.2.1335/src/gwt/lib/gin/2.1.2/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-server/2b8b815229aa8a61e483fb4ba0588b8b6c491890
+cp %{_builddir}/rstudio-1.2.1335/src/gwt/lib/gwt/2.8.1/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/d42275b8a0e5cc689d53a0c33e23a81e059ee230
+cp %{_builddir}/rstudio-1.2.1335/src/gwt/lib/gwt/2.8.1/COPYING.html %{buildroot}/usr/share/package-licenses/R-rstudio-server/10003873ed3c1002fccb4bcd8fab6c15eb6f50d6
+cp %{_builddir}/rstudio-1.2.1335/src/gwt/lib/gwt/2.8.1/samples/DynaTable/src/com/google/gwt/sample/dynatable/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33
+cp %{_builddir}/rstudio-1.2.1335/src/gwt/lib/gwt/2.8.1/samples/DynaTableRf/src/main/java/com/google/gwt/sample/dynatablerf/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33
+cp %{_builddir}/rstudio-1.2.1335/src/gwt/lib/gwt/2.8.1/samples/Hello/src/com/google/gwt/sample/hello/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33
+cp %{_builddir}/rstudio-1.2.1335/src/gwt/lib/gwt/2.8.1/samples/JSON/src/com/google/gwt/sample/json/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33
+cp %{_builddir}/rstudio-1.2.1335/src/gwt/lib/gwt/2.8.1/samples/Mail/src/com/google/gwt/sample/mail/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33
+cp %{_builddir}/rstudio-1.2.1335/src/gwt/lib/gwt/2.8.1/samples/Validation/src/main/java/com/google/gwt/sample/validation/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33
+cp %{_builddir}/rstudio-1.2.1335/src/gwt/src/com/sksamuel/gwt/LICENSE.txt %{buildroot}/usr/share/package-licenses/R-rstudio-server/2b8b815229aa8a61e483fb4ba0588b8b6c491890
+cp %{_builddir}/rstudio-1.2.1335/src/gwt/tools/compiler/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/2b8b815229aa8a61e483fb4ba0588b8b6c491890
 pushd clr-build
 %make_install
 popd
@@ -1486,22 +1501,15 @@ cp src/gwt/lib/gin/*/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-s
 
 %files license
 %defattr(0644,root,root,0755)
-/usr/share/package-licenses/R-rstudio-server/COPYING
-/usr/share/package-licenses/R-rstudio-server/NOTICE
-/usr/share/package-licenses/R-rstudio-server/dependencies_common_mathjax-26_LICENSE
-/usr/share/package-licenses/R-rstudio-server/src_cpp_core_json_spirit_LICENSE.txt
-/usr/share/package-licenses/R-rstudio-server/src_cpp_core_spelling_hunspell_license.hunspell
-/usr/share/package-licenses/R-rstudio-server/src_cpp_core_spelling_hunspell_license.myspell
-/usr/share/package-licenses/R-rstudio-server/src_cpp_session_resources_presentation_revealjs_LICENSE
-/usr/share/package-licenses/R-rstudio-server/src_cpp_tests_testthat_themes_License.txt
+/usr/share/package-licenses/R-rstudio-server/10003873ed3c1002fccb4bcd8fab6c15eb6f50d6
+/usr/share/package-licenses/R-rstudio-server/2b8b815229aa8a61e483fb4ba0588b8b6c491890
+/usr/share/package-licenses/R-rstudio-server/43a6c601dc09187ccfe403679afe04988c6f9858
+/usr/share/package-licenses/R-rstudio-server/624d6970b031569fe546798dda4f8234a8f9ed83
+/usr/share/package-licenses/R-rstudio-server/658051ae7581a663db2474f286aea7eb98490e33
+/usr/share/package-licenses/R-rstudio-server/8cfb5afa492016675405787f5dadd548193b43b2
+/usr/share/package-licenses/R-rstudio-server/9e6f2cb9a6650516417e8cbcbd753c79567d8ea5
+/usr/share/package-licenses/R-rstudio-server/a6a5418b4d67d9f3a33cbf184b25ac7f9fa87d33
+/usr/share/package-licenses/R-rstudio-server/a897c88546c86e1f1eaebd89bc101404d51e81cc
+/usr/share/package-licenses/R-rstudio-server/d42275b8a0e5cc689d53a0c33e23a81e059ee230
+/usr/share/package-licenses/R-rstudio-server/de651d505f443d8282b17cc8799399a25a7a65e3
 /usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gin_LICENSE
-/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_COPYING
-/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_COPYING.html
-/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_samples_DynaTableRf_src_main_java_com_google_gwt_sample_dynatablerf_COPYING
-/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_samples_DynaTable_src_com_google_gwt_sample_dynatable_COPYING
-/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_samples_Hello_src_com_google_gwt_sample_hello_COPYING
-/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_samples_JSON_src_com_google_gwt_sample_json_COPYING
-/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_samples_Mail_src_com_google_gwt_sample_mail_COPYING
-/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gwt_2.8.1_samples_Validation_src_main_java_com_google_gwt_sample_validation_COPYING
-/usr/share/package-licenses/R-rstudio-server/src_gwt_src_com_sksamuel_gwt_LICENSE.txt
-/usr/share/package-licenses/R-rstudio-server/src_gwt_tools_compiler_COPYING
