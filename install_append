@@ -1,1 +1,5 @@
 cp src/gwt/lib/gin/*/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gin_LICENSE
+mkdir -p %{buildroot}/usr/lib/systemd/system
+mv %{buildroot}/usr/lib64/R/rstudio-server/extras/systemd/rstudio-server.service %{buildroot}/usr/lib/systemd/system/
+mkdir -p %{buildroot}/usr/share/pam.d
+mv %{buildroot}/usr/lib64/R/rstudio-server/extras/pam/rstudio %{buildroot}/usr/share/pam.d/

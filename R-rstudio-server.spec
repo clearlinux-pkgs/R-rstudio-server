@@ -4,7 +4,7 @@
 #
 Name     : R-rstudio-server
 Version  : 1.2.1335
-Release  : 5
+Release  : 6
 URL      : https://github.com/rstudio/rstudio/archive/v1.2.1335.tar.gz
 Source0  : https://github.com/rstudio/rstudio/archive/v1.2.1335.tar.gz
 Source1  : https://s3.amazonaws.com/rstudio-buildtools/gin-2.1.2.zip
@@ -14,7 +14,9 @@ Source4  : https://s3.amazonaws.com/rstudio-buildtools/mathjax-26.zip
 Summary  : No detailed summary available
 Group    : Development/Tools
 License  : Apache-2.0 BSD-2-Clause GPL-3.0 LGPL-2.1 MIT MPL-1.1
+Requires: R-rstudio-server-data = %{version}-%{release}
 Requires: R-rstudio-server-license = %{version}-%{release}
+Requires: R-rstudio-server-services = %{version}-%{release}
 BuildRequires : Linux-PAM-dev
 BuildRequires : R
 BuildRequires : R-dev
@@ -68,12 +70,28 @@ Patch1: 0001-Disable-installation-of-pandoc.patch
 * limitations under the License.
 */
 
+%package data
+Summary: data components for the R-rstudio-server package.
+Group: Data
+
+%description data
+data components for the R-rstudio-server package.
+
+
 %package license
 Summary: license components for the R-rstudio-server package.
 Group: Default
 
 %description license
 license components for the R-rstudio-server package.
+
+
+%package services
+Summary: services components for the R-rstudio-server package.
+Group: Systemd services
+
+%description services
+services components for the R-rstudio-server package.
 
 
 %prep
@@ -105,7 +123,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1574710653
+export SOURCE_DATE_EPOCH=1574714756
 mkdir -p clr-build
 pushd clr-build
 export GCC_IGNORE_WERROR=1
@@ -123,7 +141,7 @@ make  %{?_smp_mflags}  VERBOSE=1
 popd
 
 %install
-export SOURCE_DATE_EPOCH=1574710653
+export SOURCE_DATE_EPOCH=1574714756
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/R-rstudio-server
 cp %{_builddir}/rstudio-1.2.1335/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/43a6c601dc09187ccfe403679afe04988c6f9858
@@ -148,8 +166,19 @@ cp %{_builddir}/rstudio-1.2.1335/src/gwt/tools/compiler/COPYING %{buildroot}/usr
 pushd clr-build
 %make_install
 popd
+## Remove excluded files
+rm -f %{buildroot}/usr/lib64/R/rstudio-server/extras/upstart/rstudio-server.redhat.conf
+rm -f %{buildroot}/usr/lib64/R/rstudio-server/extras/upstart/rstudio-server.conf
+rm -f %{buildroot}/usr/lib64/R/rstudio-server/extras/systemd/rstudio-server.redhat.service
+rm -f %{buildroot}/usr/lib64/R/rstudio-server/extras/init.d/suse/rstudio-server
+rm -f %{buildroot}/usr/lib64/R/rstudio-server/extras/init.d/redhat/rstudio-server
+rm -f %{buildroot}/usr/lib64/R/rstudio-server/extras/init.d/debian/rstudio-server
 ## install_append content
 cp src/gwt/lib/gin/*/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gin_LICENSE
+mkdir -p %{buildroot}/usr/lib/systemd/system
+mv %{buildroot}/usr/lib64/R/rstudio-server/extras/systemd/rstudio-server.service %{buildroot}/usr/lib/systemd/system/
+mkdir -p %{buildroot}/usr/share/pam.d
+mv %{buildroot}/usr/lib64/R/rstudio-server/extras/pam/rstudio %{buildroot}/usr/share/pam.d/
 ## install_append end
 
 %files
@@ -234,15 +263,7 @@ cp src/gwt/lib/gin/*/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-s
 /usr/lib64/R/rstudio-server/bin/rserver-pam
 /usr/lib64/R/rstudio-server/bin/rsession
 /usr/lib64/R/rstudio-server/bin/rstudio-server
-/usr/lib64/R/rstudio-server/extras/init.d/debian/rstudio-server
-/usr/lib64/R/rstudio-server/extras/init.d/redhat/rstudio-server
-/usr/lib64/R/rstudio-server/extras/init.d/suse/rstudio-server
-/usr/lib64/R/rstudio-server/extras/pam/rstudio
-/usr/lib64/R/rstudio-server/extras/systemd/rstudio-server.redhat.service
-/usr/lib64/R/rstudio-server/extras/systemd/rstudio-server.service
 /usr/lib64/R/rstudio-server/extras/themes/README.md
-/usr/lib64/R/rstudio-server/extras/upstart/rstudio-server.conf
-/usr/lib64/R/rstudio-server/extras/upstart/rstudio-server.redhat.conf
 /usr/lib64/R/rstudio-server/resources/CITATION
 /usr/lib64/R/rstudio-server/resources/NOTICE
 /usr/lib64/R/rstudio-server/resources/R.css
@@ -1499,6 +1520,10 @@ cp src/gwt/lib/gin/*/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-s
 /usr/lib64/R/rstudio-server/www/unsupported_browser.htm
 /usr/lib64/R/rstudio-server/www/webkit.nocache.html
 
+%files data
+%defattr(-,root,root,-)
+/usr/share/pam.d/rstudio
+
 %files license
 %defattr(0644,root,root,0755)
 /usr/share/package-licenses/R-rstudio-server/10003873ed3c1002fccb4bcd8fab6c15eb6f50d6
@@ -1513,3 +1538,7 @@ cp src/gwt/lib/gin/*/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-s
 /usr/share/package-licenses/R-rstudio-server/d42275b8a0e5cc689d53a0c33e23a81e059ee230
 /usr/share/package-licenses/R-rstudio-server/de651d505f443d8282b17cc8799399a25a7a65e3
 /usr/share/package-licenses/R-rstudio-server/src_gwt_lib_gin_LICENSE
+
+%files services
+%defattr(-,root,root,-)
+/usr/lib/systemd/system/rstudio-server.service

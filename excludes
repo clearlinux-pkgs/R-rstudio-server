@@ -1,2 +1,8 @@
 # This file contains the output files that need %exclude. Full path
 # names, one per line.
+/usr/lib64/R/rstudio-server/extras/upstart/rstudio-server.redhat.conf
+/usr/lib64/R/rstudio-server/extras/upstart/rstudio-server.conf
+/usr/lib64/R/rstudio-server/extras/systemd/rstudio-server.redhat.service
+/usr/lib64/R/rstudio-server/extras/init.d/suse/rstudio-server
+/usr/lib64/R/rstudio-server/extras/init.d/redhat/rstudio-server
+/usr/lib64/R/rstudio-server/extras/init.d/debian/rstudio-server
