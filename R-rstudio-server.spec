@@ -4,7 +4,7 @@
 #
 Name     : R-rstudio-server
 Version  : 1.2.1335
-Release  : 7
+Release  : 8
 URL      : https://github.com/rstudio/rstudio/archive/v1.2.1335.tar.gz
 Source0  : https://github.com/rstudio/rstudio/archive/v1.2.1335.tar.gz
 Source1  : https://s3.amazonaws.com/rstudio-buildtools/gin-2.1.2.zip
@@ -17,6 +17,7 @@ License  : Apache-2.0 BSD-2-Clause GPL-3.0 LGPL-2.1 MIT MPL-1.1
 Requires: R-rstudio-server-data = %{version}-%{release}
 Requires: R-rstudio-server-license = %{version}-%{release}
 Requires: R-rstudio-server-services = %{version}-%{release}
+Requires: psmisc
 BuildRequires : Linux-PAM-dev
 BuildRequires : R
 BuildRequires : R-dev
@@ -51,6 +52,7 @@ BuildRequires : pkgconfig(Qt5Xml)
 BuildRequires : pkgconfig(Qt5XmlPatterns)
 BuildRequires : pkgconfig(gl)
 BuildRequires : pkgconfig(uuid)
+BuildRequires : psmisc
 BuildRequires : zlib-dev
 Patch1: 0001-Disable-installation-of-pandoc.patch
 
@@ -116,14 +118,16 @@ cp -r %{_builddir}/gin-2.1.2/* %{_builddir}/rstudio-1.2.1335/src/gwt/lib/gin/2.1
 %build
 ## build_prepend content
 export LD_LIBRARY_PATH=/usr/lib64/R/lib/
+
 mkdir dependencies/common/dictionaries
 find ../../SOURCES -type f -name '*.jar' -exec cp -t src/gwt/lib/ {} +
+
 ## build_prepend end
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1574714756
+export SOURCE_DATE_EPOCH=1578471357
 mkdir -p clr-build
 pushd clr-build
 export GCC_IGNORE_WERROR=1
@@ -141,7 +145,7 @@ make  %{?_smp_mflags}  VERBOSE=1
 popd
 
 %install
-export SOURCE_DATE_EPOCH=1574714756
+export SOURCE_DATE_EPOCH=1578471357
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/R-rstudio-server
 cp %{_builddir}/rstudio-1.2.1335/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/43a6c601dc09187ccfe403679afe04988c6f9858

@@ -1,9 +1,9 @@
 # This file contains additional build requirements that did not get
 # picked up automatically. One name per line, no whitespace.
-apache-ant
 Linux-PAM-dev
+R
+R-dev
+R-lib
+apache-ant
 openjdk
 pandoc
-R
-R-lib
-R-dev
