@@ -4,7 +4,7 @@
 #
 Name     : R-rstudio-server
 Version  : 1.2.1335
-Release  : 8
+Release  : 9
 URL      : https://github.com/rstudio/rstudio/archive/v1.2.1335.tar.gz
 Source0  : https://github.com/rstudio/rstudio/archive/v1.2.1335.tar.gz
 Source1  : https://s3.amazonaws.com/rstudio-buildtools/gin-2.1.2.zip
@@ -23,10 +23,8 @@ BuildRequires : R
 BuildRequires : R-dev
 BuildRequires : R-lib
 BuildRequires : apache-ant
-BuildRequires : apache-maven
 BuildRequires : boost-dev
 BuildRequires : buildreq-cmake
-BuildRequires : buildreq-mvn
 BuildRequires : buildreq-qmake
 BuildRequires : openjdk
 BuildRequires : openssl-dev
@@ -127,7 +125,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1578471357
+export SOURCE_DATE_EPOCH=1581448806
 mkdir -p clr-build
 pushd clr-build
 export GCC_IGNORE_WERROR=1
@@ -145,7 +143,7 @@ make  %{?_smp_mflags}  VERBOSE=1
 popd
 
 %install
-export SOURCE_DATE_EPOCH=1578471357
+export SOURCE_DATE_EPOCH=1581448806
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/R-rstudio-server
 cp %{_builddir}/rstudio-1.2.1335/COPYING %{buildroot}/usr/share/package-licenses/R-rstudio-server/43a6c601dc09187ccfe403679afe04988c6f9858
