@@ -1,4 +1,4 @@
-From 5768e089940ce874e25c7ea363db99c1cbcc0630 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: Thiago Macieira <thiago.macieira@intel.com>
 Date: Thu, 2 May 2019 17:17:22 -0700
 Subject: [PATCH] Disable installation of pandoc
@@ -9,7 +9,7 @@ We already have it in the distro.
  1 file changed, 16 deletions(-)
 
 diff --git a/src/cpp/session/CMakeLists.txt b/src/cpp/session/CMakeLists.txt
-index 84a0a58750..323b915f2b 100644
+index 1fd7718..8d9306f 100644
 --- a/src/cpp/session/CMakeLists.txt
 +++ b/src/cpp/session/CMakeLists.txt
 @@ -25,9 +25,6 @@ endif()
@@ -22,26 +22,23 @@ index 84a0a58750..323b915f2b 100644
  
  # we often install embedded versions of these packages but don't do so currently
  
-@@ -479,19 +476,6 @@ install(DIRECTORY "${RSTUDIO_DEPENDENCIES_DIR}/common/mathjax-26"
- install(DIRECTORY "resources/connections"
-         DESTINATION ${RSTUDIO_INSTALL_SUPPORTING}/resources)
+@@ -490,19 +487,6 @@ if (NOT RSTUDIO_SESSION_WIN32)
+    install(DIRECTORY "resources/connections"
+            DESTINATION ${RSTUDIO_INSTALL_SUPPORTING}/resources)
  
--# install pandoc
--if(WIN32)
--   set(PANDOC_VERSION "2.6" CACHE INTERNAL "Pandoc version")
--else()
--   set(PANDOC_VERSION "2.3.1" CACHE INTERNAL "Pandoc version")
--endif()
+-   # install pandoc
+-   if(WIN32)
+-      set(PANDOC_VERSION "2.7.2" CACHE INTERNAL "Pandoc version")
+-   else()
+-      set(PANDOC_VERSION "2.3.1" CACHE INTERNAL "Pandoc version")
+-   endif()
 -
--set(PANDOC_BIN "${RSTUDIO_DEPENDENCIES_DIR}/common/pandoc/${PANDOC_VERSION}")
--file(GLOB PANDOC_FILES "${PANDOC_BIN}/pandoc*")
--install(FILES ${PANDOC_FILES}
--        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
--        DESTINATION  ${RSTUDIO_INSTALL_BIN}/pandoc)
+-   set(PANDOC_BIN "${RSTUDIO_DEPENDENCIES_DIR}/common/pandoc/${PANDOC_VERSION}")
+-   file(GLOB PANDOC_FILES "${PANDOC_BIN}/pandoc*")
+-   install(FILES ${PANDOC_FILES}
+-           PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+-           DESTINATION  ${RSTUDIO_INSTALL_BIN}/pandoc)
 -
- # install rmarkdown package
- # file(GLOB RMARKDOWN_PACKAGE "${RSTUDIO_DEPENDENCIES_DIR}/common/rmarkdown*.tar.gz")
- # install(FILES ${RMARKDOWN_PACKAGE}
--- 
-2.21.0
-
+    # install rmarkdown package
+    # file(GLOB RMARKDOWN_PACKAGE "${RSTUDIO_DEPENDENCIES_DIR}/common/rmarkdown*.tar.gz")
+    # install(FILES ${RMARKDOWN_PACKAGE}
