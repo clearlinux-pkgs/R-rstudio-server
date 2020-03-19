@@ -4,7 +4,7 @@
 #
 Name     : R-rstudio-server
 Version  : 1.2.5033
-Release  : 11
+Release  : 12
 URL      : https://github.com/rstudio/rstudio/archive/v1.2.5033/rstudio-1.2.5033.tar.gz
 Source0  : https://github.com/rstudio/rstudio/archive/v1.2.5033/rstudio-1.2.5033.tar.gz
 Source1  : https://s3.amazonaws.com/rstudio-buildtools/gin-2.1.2.zip
