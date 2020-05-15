@@ -9,7 +9,7 @@ We already have it in the distro.
  1 file changed, 16 deletions(-)
 
 diff --git a/src/cpp/session/CMakeLists.txt b/src/cpp/session/CMakeLists.txt
-index 1fd7718..8d9306f 100644
+index 8ba9c0f..29575ff 100644
 --- a/src/cpp/session/CMakeLists.txt
 +++ b/src/cpp/session/CMakeLists.txt
 @@ -25,9 +25,6 @@ endif()

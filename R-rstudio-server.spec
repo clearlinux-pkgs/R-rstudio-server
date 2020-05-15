@@ -4,7 +4,7 @@
 #
 Name     : R-rstudio-server
 Version  : 1.2.5042
-Release  : 13
+Release  : 14
 URL      : https://github.com/rstudio/rstudio/archive/v1.2.5042/rstudio-1.2.5042.tar.gz
 Source0  : https://github.com/rstudio/rstudio/archive/v1.2.5042/rstudio-1.2.5042.tar.gz
 Source1  : https://s3.amazonaws.com/rstudio-buildtools/gin-2.1.2.zip
@@ -51,9 +51,18 @@ BuildRequires : pkgconfig(Qt5XmlPatterns)
 BuildRequires : pkgconfig(gl)
 BuildRequires : pkgconfig(uuid)
 BuildRequires : psmisc
+BuildRequires : qtbase-dev
+BuildRequires : qtdeclarative-dev
+BuildRequires : qtlocation-dev
+BuildRequires : qtsensors-dev
+BuildRequires : qtsvg-dev
+BuildRequires : qtwebchannel-dev
+BuildRequires : qtwebengine-dev
+BuildRequires : qtxmlpatterns-dev
 BuildRequires : zlib-dev
 Patch1: 0001-Disable-installation-of-pandoc.patch
 Patch2: 0002-first-pass-at-Boost-1.70-support.patch
+Patch3: 0003-R_Slave-R_NoEcho-for-non-Windows.patch
 
 %description
 /*
@@ -114,6 +123,7 @@ mkdir -p src/gwt/lib/gin/2.1.2
 cp -r %{_builddir}/gin-2.1.2/* %{_builddir}/rstudio-1.2.5042/src/gwt/lib/gin/2.1.2
 %patch1 -p1
 %patch2 -p1
+%patch3 -p1
 
 %build
 ## build_prepend content
@@ -127,17 +137,16 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1587067974
+export SOURCE_DATE_EPOCH=1589554472
 mkdir -p clr-build
 pushd clr-build
-# -Werror is for werrorists
 export GCC_IGNORE_WERROR=1
 export AR=gcc-ar
 export RANLIB=gcc-ranlib
 export NM=gcc-nm
 export CFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
-export FCFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
-export FFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FCFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
 export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=4 "
 %cmake .. -DRSTUDIO_TARGET=Server \
 -DQT_QMAKE_EXECUTABLE=`which qmake` \
@@ -146,7 +155,7 @@ make  %{?_smp_mflags}  VERBOSE=1
 popd
 
 %install
-export SOURCE_DATE_EPOCH=1587067974
+export SOURCE_DATE_EPOCH=1589554472
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/R-rstudio-server
 cp %{_builddir}/gin-2.1.2/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-server/2b8b815229aa8a61e483fb4ba0588b8b6c491890
