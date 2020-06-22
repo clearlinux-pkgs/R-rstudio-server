@@ -4,7 +4,7 @@
 #
 Name     : R-rstudio-server
 Version  : 1.2.5042
-Release  : 15
+Release  : 16
 URL      : https://github.com/rstudio/rstudio/archive/v1.2.5042/rstudio-1.2.5042.tar.gz
 Source0  : https://github.com/rstudio/rstudio/archive/v1.2.5042/rstudio-1.2.5042.tar.gz
 Source1  : https://s3.amazonaws.com/rstudio-buildtools/gin-2.1.2.zip
@@ -63,6 +63,7 @@ BuildRequires : zlib-dev
 Patch1: 0001-Disable-installation-of-pandoc.patch
 Patch2: 0002-first-pass-at-Boost-1.70-support.patch
 Patch3: 0003-R_Slave-R_NoEcho-for-non-Windows.patch
+Patch4: 0004-Fix-build-with-boost-1.73.0.patch
 
 %description
 /*
@@ -124,6 +125,7 @@ cp -r %{_builddir}/gin-2.1.2/* %{_builddir}/rstudio-1.2.5042/src/gwt/lib/gin/2.1
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 %build
 ## build_prepend content
@@ -137,7 +139,7 @@ export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
 export LANG=C.UTF-8
-export SOURCE_DATE_EPOCH=1589554472
+export SOURCE_DATE_EPOCH=1592844539
 mkdir -p clr-build
 pushd clr-build
 export GCC_IGNORE_WERROR=1
@@ -151,11 +153,11 @@ export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=4 "
 %cmake .. -DRSTUDIO_TARGET=Server \
 -DQT_QMAKE_EXECUTABLE=`which qmake` \
 -DCMAKE_INSTALL_PREFIX=/usr/lib64/R/rstudio-server
-make  %{?_smp_mflags}  VERBOSE=1
+make  %{?_smp_mflags}
 popd
 
 %install
-export SOURCE_DATE_EPOCH=1589554472
+export SOURCE_DATE_EPOCH=1592844539
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/R-rstudio-server
 cp %{_builddir}/gin-2.1.2/LICENSE %{buildroot}/usr/share/package-licenses/R-rstudio-server/2b8b815229aa8a61e483fb4ba0588b8b6c491890

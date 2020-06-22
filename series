@@ -1,3 +1,4 @@
 0001-Disable-installation-of-pandoc.patch
 0002-first-pass-at-Boost-1.70-support.patch
 0003-R_Slave-R_NoEcho-for-non-Windows.patch
+0004-Fix-build-with-boost-1.73.0.patch
